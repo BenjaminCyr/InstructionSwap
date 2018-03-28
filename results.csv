@@ -1,0 +1,9 @@
+Arrangements with 16 Swaps
+Program Name, Number of Instr., Number of Swappable Instr., Total Arrangements
+qsort_large.s,181,77,1.16E+33
+dijkstra.s,342,237,2.27E+47
+fft.s,368,191,3.27E+45
+basicmath.s,480,209,2.59E+51
+sha.s,577,471,3.75E+64
+rsa.s,1658,1297,2.82E+76
+aes.s,1757,1134,1.34E+73
