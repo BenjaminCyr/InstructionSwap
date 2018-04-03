@@ -3,10 +3,19 @@ import os, glob
 import re
 import random
 
-
+DEFAULT_LIST = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]
+#index_list = [0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,14,14,15,15]
+index_list = DEFAULT_LIST
 #Instructions where the first register is the source register
 source_first_instructions = ('bx','bl','bgt','blt','b','beq','ldm', 'stm',
 	'push','pop', 'nop', 'cmp', 'str')
+
+def reset_index_list():
+	index_list = DEFAULT_LIST
+
+def index_not_used(instruction, index_list):
+	cache_index = instruction[2] & 0x1F
+	return cache_index in index_list
 
 ''' Regex to make a list of all registers '''
 def get_regs(instruction):
@@ -79,6 +88,7 @@ def is_swappable(instruction1, instruction2, instructions):
 		(op2_before != op1 or reg2_before != regs1[0]) and \
 		(op2_after != op1 or reg2_after != regs1[0])
 
+
 	return can_swap
 
 ''' Swap the Instructions '''
@@ -144,9 +154,12 @@ def swap_instructions(filename, num_swaps):
 		#Counting Up all swaps
 		for line in ins_copy:
 			remove_copy.remove(line)
-			for other_line in remove_copy:
-				if (is_swappable(line, other_line, instructions)):
-					num_possible_swaps += 1
+			if index_not_used(line, index_list):
+				index_list.remove(line[2] & 0x1F)
+				for other_line in remove_copy:
+					if is_swappable(line, other_line, instructions) and index_not_used(other_line, index_list):
+						num_possible_swaps += 1
+				index_list.append(line[2] & 0x1F)
 
 		if num_possible_swaps == 0:
 			print("No More Swaps Possible")
@@ -158,9 +171,12 @@ def swap_instructions(filename, num_swaps):
 		while len(possible_swaps) < 1:
 			possible_swaps = []
 			instruction = ins_copy[rand_index]
-			for other_instruction in ins_copy:
-				if (is_swappable(instruction, other_instruction, instructions)):
-					possible_swaps.append(other_instruction)
+			if index_not_used(instruction, index_list):
+				index_list.remove(instruction[2] & 0x1F)
+				for other_instruction in ins_copy:
+					if is_swappable(instruction, other_instruction, instructions) and index_not_used(other_instruction, index_list):
+						possible_swaps.append(other_instruction)
+				index_list.append(instruction[2] & 0x1F)
 			rand_index = (rand_index + 1) % len(ins_copy)
 
 		#Choose random swap
@@ -174,6 +190,8 @@ def swap_instructions(filename, num_swaps):
 
 		copy_swappable.remove(swapped_line)
 		copy_swappable.remove(swapped_other_line)
+		index_list.remove(swapped_line[2] & 0x1F)
+		index_list.remove(swapped_other_line[2] & 0x1F)
 		swapped_lines.append((swapped_line[1], swapped_other_line[1]))
 		total_arrangements *= num_possible_swaps
 
@@ -223,6 +241,7 @@ if __name__ == "__main__":
 		os.chdir(os.path.dirname(os.path.realpath(__file__)))
 		for file in glob.glob("src/*.s"):
 			filename = file[4:]
+			index_list = DEFAULT_LIST[:]
 			results.append(swap_instructions(filename, num_swaps))
 
 		results.sort(key=lambda tup: tup[1])
