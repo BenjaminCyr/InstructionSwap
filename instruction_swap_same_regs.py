@@ -187,6 +187,7 @@ def swap_instructions(filename, num_swaps):
 		#Print Swap and remove instructions
 		print("{0:<5}: {1:<25}  <---->  {2:<5}: {3:<25} : {4}".format(swapped_line[1], swapped_line[0],
 		swapped_other_line[1], swapped_other_line[0], num_possible_swaps))
+		print(swapped_line[2] & 0x1F, "  ", swapped_other_line[2] & 0x1F)
 
 		copy_swappable.remove(swapped_line)
 		copy_swappable.remove(swapped_other_line)
@@ -241,6 +242,7 @@ if __name__ == "__main__":
 		os.chdir(os.path.dirname(os.path.realpath(__file__)))
 		for file in glob.glob("src/*.s"):
 			filename = file[4:]
+			print("Swapping instructions in :", filename)
 			index_list = DEFAULT_LIST[:]
 			results.append(swap_instructions(filename, num_swaps))
 
